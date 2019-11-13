@@ -1,0 +1,13 @@
+/*4.	Execute 3 more Insert commands that attempt to insert 3 more records, such that the records violate the integrity constraints. Make each of the 3 records violate a different type of integrity constraint
+
+a) Unique Constraint : Since Column "Country_name" in COUNTRY table is a primary key and already "Country_Name" = 'Australia' is present in the table and we cannot insert the same name "Australia" in the table */
+
+INSERT INTO COUNTRY VALUES ('Australia',28,5,'Amrit Raj');
+
+/* b) NOT NULL CONSTRAINT : Cannot insert a NULL value into the Country_Name Column of the Country table because Country_Name is the primary key and it cannot take null values */
+
+INSERT INTO COUNTRY VALUES ('',23,5,'SUBEER');
+
+/*c) Referential Integrity Constraint : column " Country" of "Players" table is referring to the column " Country_Name" of table "Country" (this does not have the "INDIA" as the Key in its table , that is the reason we cannot insert a new recrd in to the child table whose parent is not found in the parent table.)*/
+
+INSERT INTO PLAYERS VALUES( 1,'Amrit Raj','Amrit','Raj','31-08-93','INDIA',179,'Mumbai Indians','Forward',99,'TRUE');

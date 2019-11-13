@@ -1,0 +1,6 @@
+INSERT INTO COUNTRY VALUES ('India',28,5,'Amrit Raj'); 
+COMMIT;
+INSERT INTO COUNTRY VALUES ('SriLanka',22,0,'Arnold'); 
+COMMIT;
+INSERT INTO PLAYERS VALUES( 786,'Abhishek Singh','Abhishek','Singh','28-08-1993','India',179,'Mumbai Indians','Forward',59,'FALSE');
+COMMITT ;

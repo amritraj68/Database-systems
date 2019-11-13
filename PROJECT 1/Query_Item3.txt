@@ -1,0 +1,86 @@
+/*1) Print the name, club, and country name of all midfielder players whose country is 'USA' */
+SELECT NAME ,CLUB,COUNTRY FROM PLAYERS WHERE POSITION = 'Midfielder' and COUNTRY = 'USA';
+
+/* 2) Print the name, club, country and age of captains of each country participating in the 2014 world cup (this database)*/
+SELECT NAME , CLUB, COUNTRY , ROUND((SYSDATE - TO_DATE(DOB))/365.25) AS AGE , DOB FROM PLAYERS WHERE IS_CAPTAIN ='TRUE';
+
+/*3) Retrieve the names of countries participating in the 2014 world cup (this database) that have won the world cup more than twice. */
+SELECT COUNTRY_NAME FROM country WHERE NO_OF_WORLDCUP_WON > 2;
+
+/*4) Retrieve the names of countries participating in the 2014 world cup (this database) that have never won the world cup. */
+SELECT COUNTRY_NAME FROM COUNTRY WHERE NO_OF_WORLDCUP_WON = 0 ;
+
+/* 5) Retrieve the name and country of the player who had neither red cards nor yellow cards in the 2014 world cup.*/
+SELECT P.NAME,P.COUNTRY FROM PLAYERS P WHERE P.PLAYER_ID IN
+   (SELECT PP.PLAYER_ID FROM PLAYER_CARDS PP WHERE YELLOW_CARDS = 0 AND RED_CARDS = 0);
+
+/* 6) Retrieve the name and country of the players with the most Red cards in the 2014 world cup.*/
+SELECT P.NAME, P.COUNTRY FROM PLAYERS P , PLAYER_CARDS PP WHERE P.PLAYER_ID = PP.PLAYER_ID AND
+ PP.RED_CARDS = (SELECT MAX(PP.RED_CARDS) FROM PLAYER_CARDS PP ) ;
+
+/*7) For each Host city, retrieve the HostCity and the total number of games played in that city. */
+ SELECT HOST_CITY , COUNT(HOST_CITY) AS TOTAL_NUMBER_OF_GAMES_PLAYED FROM MATCH_RESULTS GROUP BY (HOST_CITY);
+
+/* 8) Retrieve the names of host city with the most games played in that city*/
+ SELECT M.HOST_CITY, COUNT(M.HOST_CITY) AS NUMBER_OF_GAMES_PLAYED FROM MATCH_RESULTS M
+GROUP BY (M.HOST_CITY)
+HAVING COUNT(M.HOST_CITY) =
+(SELECT MAX(COUNT(M.HOST_CITY)) FROM MATCH_RESULTS M GROUP BY (M.HOST_CITY));
+
+/* 9) For each country, retrieve the country name and the number of games they played as Team1 in the MATCH_RESULTS table, and
+the total goals scored (SUM of Team1_score) and the goals against (SUM of Team2_score).*/
+SELECT C.COUNTRY_NAME , COUNT(M.TEAM1) AS NUMBER_OF_GAMES_PLAYED_AS_TEAM1, SUM(TEAM1_SCORE) AS SUM_OF_TEAM1, SUM(TEAM2_SCORE) AS SUM_OF_TEAM2
+FROM COUNTRY C , MATCH_RESULTS M
+WHERE C.COUNTRY_NAME = M.TEAM1 AND C.COUNTRY_NAME IN (SELECT TEAM1 FROM MATCH_RESULTS)
+GROUP BY (C.COUNTRY_NAME);
+
+/* 10) For each country, retrieve the country name and the number of games they played as Team2 in the MATCH_RESULTS table, and 
+the total goals scored (SUM of Team12_score) and the goals against (SUM of Team1_score)*/
+SELECT C.COUNTRY_NAME , COUNT(M.TEAM2) AS NUMBER_OF_GAMES_PLAYED_AS_TEAM2, SUM(TEAM2_SCORE) AS SUM_OF_GOALS_SCORED_TEAM2, SUM(TEAM1_SCORE) AS SUM_OF_GOALS_SCORED_TEAM1
+FROM COUNTRY C , MATCH_RESULTS M
+WHERE C.COUNTRY_NAME = M.TEAM2 AND C.COUNTRY_NAME IN (SELECT TEAM2 FROM MATCH_RESULTS)
+GROUP BY (C.COUNTRY_NAME);
+
+/* 11)	Write a query that combines the results of the queries in 9. and 10. To get the total number of games each country has played (either as Team1 or as Team2), their total goals scored and their total goals against. Create a view TEAM_SUMMARY that has the following data attributes to hold the result of the combined query: CountryName, NoOfGames, TotalGoalsFor, TotalGoalsAgainst. Order in descending order of number of games played*/
+
+CREATE VIEW TEAM_SUMMARY
+AS SELECT T1.COUNTRY_NAME, SUM(T1.TOTAL_GAMES_PLAYED) TOTAL_GAMES_PLAYED ,SUM(T1.TOTAL_GOALS_FOR) TOTAL_GOALS_FOR, SUM(T1.TOTAL_GOALS_AGAINST) TOTAL_GOALS_AGAINST
+FROM
+(SELECT C.COUNTRY_NAME , COUNT(*) AS TOTAL_GAMES_PLAYED, SUM(M.TEAM1_SCORE) AS TOTAL_GOALS_FOR, SUM(M.TEAM2_SCORE) AS TOTAL_GOALS_AGAINST
+FROM COUNTRY C , MATCH_RESULTS M
+WHERE C.COUNTRY_NAME = M.TEAM1 AND C.COUNTRY_NAME IN (SELECT TEAM1 FROM MATCH_RESULTS)
+group by C.COUNTRY_NAME
+UNION
+SELECT C.COUNTRY_NAME, COUNT(*) AS TOTAL_GAMES_PLAYED, SUM(M.TEAM2_SCORE) AS TOTAL_GOALS_FOR, SUM(M.TEAM1_SCORE) AS TOTAL_GOALS_AGAINST
+FROM COUNTRY C , MATCH_RESULTS M
+WHERE C.COUNTRY_NAME = M.TEAM2 AND C.COUNTRY_NAME IN (SELECT TEAM2 FROM MATCH_RESULTS)
+group by C.COUNTRY_NAME)T1
+GROUP BY T1.COUNTRY_NAME
+ORDER BY TOTAL_GAMES_PLAYED DESC;
+COMMIT;
+SELECT * FROM TEAM_SUMMARY;
+
+/* 12)	For each match, print the date of match, name of team1, name of team2, name of winning team and goal difference between teams. 
+Goal difference should be a positive value.*/
+
+SELECT DATE_OF_MATCH, TEAM1 , TEAM2, 
+CASE WHEN TEAM1_SCORE > TEAM2_SCORE THEN TEAM1 
+     ELSE TEAM2
+END AS WINNING_TEAM,
+abs(TEAM1_SCORE-TEAM2_SCORE) AS GOAL_DIFFERENCE 
+FROM MATCH_RESULTS;
+
+/* 13) Find all the matches played with country ‘Brazil’.  */
+SELECT * FROM MATCH_RESULTS WHERE TEAM1 LIKE 'Brazil' or TEAM2 LIKE 'Brazil';
+
+/*14) Retrieve the names of the players who have scored at least one goal, the player’s country, and the number of goals each player scored. 
+Order the result by number of goals scored in descending order. */
+SELECT P.NAME, P.COUNTRY, G.GOALS FROM PLAYERS P, PLAYER_ASSIST_GOALS G 
+WHERE P.PLAYER_ID = G.PLAYER_ID AND G.GOALS >= 1 ORDER BY G.GOALS DESC;
+
+/*15) Repeat 14. But only for the players who have more than 2 goals. */
+SELECT P.NAME, P.COUNTRY, G.GOALS FROM PLAYERS P, PLAYER_ASSIST_GOALS G 
+WHERE P.PLAYER_ID = G.PLAYER_ID AND G.GOALS > 2 ORDER BY G.GOALS DESC;
+
+/* 16)Make a list of participating countries and their population, ordered in descending order of population. */
+SELECT COUNTRY_NAME , POPULATION FROM COUNTRY ORDER BY POPULATION DESC ;   

@@ -1,0 +1,5 @@
+/* Referential Integrity violation while deleting a parent record : The parent record cannot be deleted because it has a child record.
+
+ // Already Country_Name = 'Australia' is the primary key in Country table and is being referenced by the "Country" column of the Players table. so the parent record cannot be deleted as it has a child record.*/
+
+DELETE FROM COUNTRY WHERE COUNTRY_NAME ='Australia';
