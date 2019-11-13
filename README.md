@@ -8,3 +8,5 @@ In this project, worked on the relational Database ( ORACLE RDBMS). Used the int
 Written the CREATE TABLE statements in a text file, and executed the commands from the file through SQLPLUS. Captured the execution in a spool file that will be turned in. Specified appropriate key and referential integrity constraints. 
 
 Written JAVA with JDBC Programs to load the records into each of the tables that were created and executed the queries that were given as part of the Problem Statement.
+
+Note : To learn more about project1, You can refer to the report for project1 attached in the folder Project1
